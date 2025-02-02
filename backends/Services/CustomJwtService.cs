@@ -16,7 +16,7 @@ public class CustomJwtService
 
     public string GenerateToken(string email)
     {
-        string Jwt = _config["Jwt:Key"];
+        string Jwt;
 
         Jwt = "YourVeryStrongKey123!";
 
@@ -25,8 +25,10 @@ public class CustomJwtService
 
         var claims = new[]
         {
+
                 new Claim(JwtRegisteredClaimNames.Sub, email),
-                new Claim(JwtRegisteredClaimNames.Email, email)
+                new Claim(JwtRegisteredClaimNames.Email, email),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
         var token = new JwtSecurityToken("Osama", "People", claims, expires: DateTime.UtcNow.AddHours(1), signingCredentials: credentials);
