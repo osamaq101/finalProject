@@ -51,6 +51,7 @@ public class ValuesController : ControllerBase
             if (existingUser != null) return BadRequest("Email already exists.");
 
             model.PasswordHash = HashPassword(model.PasswordHash);
+            model.ProfileImageUrl = "https://s32030.s3.us-east-2.amazonaws.com/default-profile-picture1.jpg";
             await _context.SaveAsync(model);
         }
 
@@ -172,28 +173,8 @@ public class ValuesController : ControllerBase
         dynamic token = "";
         string userEmail = "";
         string password = "";
+        string ProfileImageUrl = "";
 
-
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.UTF8.GetBytes("YourVeryStrongKey123!");
-        var tokenDescriptor = new SecurityTokenDescriptor
-        {
-            Subject = new ClaimsIdentity(new[]
-            {
-        new Claim("sub", "test@example.com"),
-        new Claim("email", "test@example.com")
-    }),
-            Expires = DateTime.UtcNow.AddDays(1),
-            Issuer = "Osama",
-            Audience = "People",
-            SigningCredentials = new SigningCredentials(
-                new SymmetricSecurityKey(key),
-                SecurityAlgorithms.HmacSha256Signature
-            )
-        };
-         token = tokenHandler.CreateToken(tokenDescriptor);
-        var jwt = tokenHandler.WriteToken(token);
-        Console.WriteLine(jwt);
 
 
 
@@ -201,13 +182,14 @@ public class ValuesController : ControllerBase
         try
         {
             var user = await _context.LoadAsync<User>(model.Email);
-            if (user == null || !VerifyPassword(model.PasswordHash, user.PasswordHash))
+             if (user == null || !VerifyPassword(model.PasswordHash, user.PasswordHash))
             {
                 return Unauthorized("Invalid credentials.");
             }
-            userEmail = user.Email;
+             userEmail = user.Email;
             password = user.PasswordHash;
-            token = _jwtService.GenerateToken(user.Email);
+        
+            token = _jwtService.GenerateToken(user.Email,user.Name, user.ProfileImageUrl);
             
         }
         catch (Exception ex)
